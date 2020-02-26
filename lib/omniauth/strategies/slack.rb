@@ -86,7 +86,7 @@ module OmniAuth
         url = url.to_s
         Rails.logger.info("****AccesToken****#{@user_info}")
         @user_info ||= access_token.get(url).parsed
-         Rails.logger.info("****UserInfo****#{@user_info}")
+         Rails.logger.info("**********UserInfo************#{@user_info}")
           @user_info
       end
 
