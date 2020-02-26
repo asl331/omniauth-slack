@@ -7,11 +7,11 @@ module OmniAuth
     class Slack < OmniAuth::Strategies::OAuth2
       option :name, 'slack'
 
-      option :authorize_options, [:scope, :team]
+      option :authorize_options, [:scope, :user_scope, :team]
 
       option :client_options, {
-        site: 'https://slack.com',
-        token_url: '/api/oauth.access'
+          site: 'https://slack.com',
+          token_url: '/api/oauth.v2.access'
       }
 
       option :auth_token_params, {
@@ -56,7 +56,7 @@ module OmniAuth
 
       def authorize_params
         super.tap do |params|
-          %w[scope team].each do |v|
+          %w[scope user_scope team].each do |v|
             if request.params[v]
               params[v.to_sym] = request.params[v]
             end
@@ -66,6 +66,8 @@ module OmniAuth
 
       def identity
         @identity ||= access_token.get('/api/users.identity').parsed
+        Rails.logger.info("****Identity****#{@identity}")
+        @identity
       end
 
       def user_identity
@@ -74,18 +76,24 @@ module OmniAuth
 
       def team_identity
         @team_identity ||= identity['team'].to_h
+         Rails.logger.info("****TeamIdentity****#{@team_identity}")
+        @team_identity
       end
 
       def user_info
         url = URI.parse('/api/users.info')
         url.query = Rack::Utils.build_query(user: user_identity['id'])
         url = url.to_s
-
+        Rails.logger.info("****AccesToken****#{@user_info}")
         @user_info ||= access_token.get(url).parsed
+         Rails.logger.info("****UserInfo****#{@user_info}")
+          @user_info
       end
 
       def team_info
         @team_info ||= access_token.get('/api/team.info').parsed
+        Rails.logger.info("****TeamInfo***#{@team_info}")
+          @team_info
       end
 
       def web_hook_info
